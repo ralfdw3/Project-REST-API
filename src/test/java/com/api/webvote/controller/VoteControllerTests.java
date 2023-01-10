@@ -1,6 +1,8 @@
 package com.api.webvote.controller;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.standaloneSetup;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -13,7 +15,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -34,6 +38,12 @@ public class VoteControllerTests {
 
 	@Autowired
 	private VoteController voteController;
+	
+	@Autowired
+	private ClientController clientController;
+	
+	@Autowired
+	private ScheduleController scheduleController;
 
 	@MockBean
 	private ClientRepository clientRepository;
@@ -51,19 +61,17 @@ public class VoteControllerTests {
 
 	@Test
 	public void deveRetornarSucesso_novoVoto() throws Exception {
-
-		ObjectMapper objectMapper = new ObjectMapper();
-
-		Client client = new Client("Test Client", "000.000.000-00");
-		clientRepository.save(client);
+		
+		Client client = new Client("Test Client", "150.000.000-00");
+		ResponseEntity<Client> clientExpected = clientController.save(client);
 
 		Schedule schedule = new Schedule("title", 5L);
-		scheduleRepository.save(schedule);
+		ResponseEntity<Schedule> scheduleExpected = scheduleController.newSchedule(schedule);
 
-		Vote vote = new Vote("Sim", client.getId(), schedule.getId());
-
-		mockMvc.perform(post("/api/vote/save").contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(vote))).andExpect(status().isOk());
+		Vote vote = new Vote("Sim", clientExpected.getBody().getId(), scheduleExpected.getBody().getId());
+		ResponseEntity<Vote> voteExpected = voteController.save(vote);
+		
+		assertEquals(HttpStatus.OK, voteExpected.getStatusCode());
 	}
 
 	@Test
@@ -98,28 +106,35 @@ public class VoteControllerTests {
 	}
 
 	@Test
-	public void deveRetornarFalha_clienteJaVotouNaPauta() throws Exception {
-
-		// cria um cliente e uma pauta de teste e salva no banco de dados
+	public void deveRetornarFalha_clienteJaVotouNaPauta() throws Exception 
+	{
 		Client testClient = new Client("Test Client", "000.000.000-00");
-		testClient = clientRepository.save(testClient);
-		Schedule testSchedule = new Schedule("Test Schedule", 5L);
-		testSchedule = scheduleRepository.save(testSchedule);
-
-		// cria um voto para o cliente e pauta de teste e salva no banco de dados
+		testClient.setId(1L);
+	
+		Schedule testSchedule = new Schedule("Test Schedule", 1L);
+		testSchedule.setId( 1L );
+	
 		Vote testVote = new Vote("Sim", testClient.getId(), testSchedule.getId());
-		testVote = voteRepository.save(testVote);
+		testVote.setId( 1L );
+	
+		when(clientRepository.save(testClient)).thenReturn( testClient );
+		when(scheduleRepository.save(testSchedule)).thenReturn( testSchedule );
+		when(voteRepository.save(testVote)).thenReturn( testVote );
 
 		// cria uma requisição POST para a API passando o mesmo cliente e pauta de teste
 		MvcResult result = mockMvc
-				.perform(post("/api/vote/save").contentType(MediaType.APPLICATION_JSON).content(asJsonString(testVote)))
+				.perform(post("/api/vote/save").contentType(MediaType.APPLICATION_JSON).content(asJsonString( testVote )))
 				.andExpect(status().isBadRequest()).andReturn();
 	}
 
-	public static String asJsonString(final Object obj) {
-		try {
+	public static String asJsonString(final Object obj) 
+	{
+		try 
+		{
 			return new ObjectMapper().writeValueAsString(obj);
-		} catch (JsonProcessingException e) {
+		}
+		catch (JsonProcessingException e) 
+		{
 			throw new RuntimeException(e);
 		}
 	}

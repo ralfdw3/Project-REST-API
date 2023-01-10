@@ -47,7 +47,7 @@ public class VoteController {
 
 		// Busca o objeto schedule
 		Optional<Schedule> optionalSchedule = scheduleRepository.findById(idSchedule);
-		if (!optionalSchedule.isPresent()) {
+		if (optionalSchedule.isEmpty()) {
 			logger.debug("-> Pauta não encontrada.");
 			return ResponseEntity.notFound().build();
 		}
@@ -102,3 +102,4 @@ public class VoteController {
 	}
 
 }
+

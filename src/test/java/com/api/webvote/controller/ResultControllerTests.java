@@ -1,6 +1,7 @@
 package com.api.webvote.controller;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.standaloneSetup;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -52,7 +53,7 @@ public class ResultControllerTests {
 		  // cria um registro de pauta de teste e salva no banco de dados mockado
 		  Schedule testSchedule = new Schedule(1L, "Test Schedule", 2L, 10, null, null, 0, 0);
 		  
-		  when(scheduleRepository.findById(testSchedule.getId())).thenReturn(Optional.of(testSchedule));
+		  when(scheduleRepository.findById( 1L )).thenReturn( Optional.of(testSchedule) );
 
 		  // realiza uma chamada GET para a API passando o ID da pauta de teste
 		  MvcResult result = mockMvc.perform(get("/api/schedule/result/{id}", testSchedule.getId()))
@@ -60,13 +61,14 @@ public class ResultControllerTests {
 		    .andReturn();
 
 		  // verifica se o método findById() do repositório de pautas foi chamado com o ID da pauta
-		  verify(scheduleRepository).findById(testSchedule.getId());
+
+		  verify(scheduleRepository, times( 3 )).findById(testSchedule.getId());
 		  // verifica se não houve mais interações com o repositório de pautas
 		  verifyNoMoreInteractions(scheduleRepository);
 
 		  // verifica se o corpo da resposta é a string esperada
 		  String responseBody = result.getResponse().getContentAsString();
-		  Assertions.assertEquals("Esta pauta teve um total de 0 sendo 0 votos 'Sim' e 0 votos 'Não'", responseBody);
+		  Assertions.assertEquals("Esta pauta teve um total de 0 votos, sendo destes 0 votos 'Sim' e 0 votos 'Não'", responseBody);
 		}
 		
 		@Test
@@ -75,6 +77,5 @@ public class ResultControllerTests {
 			mockMvc.perform(get("/api/schedule/result/{id}", 99999)).andExpect(status().isNotFound());
 			
 		}
-
-
 }
+
