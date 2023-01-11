@@ -92,11 +92,9 @@ public class VoteController {
 
 		clientRepository.save(client);
 		scheduleRepository.save(schedule);
-
-		logger.debug("-> Voto contabilizado");
-
 		voteRepository.save(vote);
-
+		
+		logger.debug("-> Voto contabilizado");
 		return ResponseEntity.ok(vote);
 
 	}

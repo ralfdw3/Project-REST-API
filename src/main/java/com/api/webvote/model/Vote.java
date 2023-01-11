@@ -26,13 +26,14 @@ public class Vote {
 	@Column(nullable = false)
 	private Long scheduleId;
 
-	public Vote(String vote, Long clientId, Long scheduleId) {
+
+	public Vote(Long id, String vote, Long clientId, Long scheduleId) {
 		super();
+		this.id = id;
 		this.vote = vote;
 		this.clientId = clientId;
 		this.scheduleId = scheduleId;
 	}
-	
 	
 	
 }

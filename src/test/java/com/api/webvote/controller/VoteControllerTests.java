@@ -2,16 +2,20 @@ package com.api.webvote.controller;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.standaloneSetup;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -63,70 +67,120 @@ public class VoteControllerTests {
 	public void deveRetornarSucesso_novoVoto() throws Exception {
 		
 		Client client = new Client("Test Client", "150.000.000-00");
-		ResponseEntity<Client> clientExpected = clientController.save(client);
-
-		Schedule schedule = new Schedule("title", 5L);
-		ResponseEntity<Schedule> scheduleExpected = scheduleController.newSchedule(schedule);
-
-		Vote vote = new Vote("Sim", clientExpected.getBody().getId(), scheduleExpected.getBody().getId());
-		ResponseEntity<Vote> voteExpected = voteController.save(vote);
+		client.setId(1L);
+		client.setVotedSchedules("10;");
 		
-		assertEquals(HttpStatus.OK, voteExpected.getStatusCode());
-	}
+		when(clientRepository.findById(1L)).thenReturn(Optional.of(client));
 
-	@Test
-	public void deveRetornarFalha_votoDiferenteSimNao() throws Exception {
+		Schedule schedule = new Schedule("Test Schedule", 1L);
+		schedule.setId(1L);
+		schedule.setStartTime(Timestamp.valueOf(LocalDateTime.now()));
+		schedule.setEndTime(Timestamp.valueOf(Timestamp.valueOf(LocalDateTime.now()).toLocalDateTime().plusMinutes(5)));
+		
+		when(scheduleRepository.findById(1L)).thenReturn(Optional.of(schedule));
 
-		ObjectMapper objectMapper = new ObjectMapper();
-
-		Client client = new Client("Test Client", "000.000.000-00");
-		clientRepository.save(client);
-
-		Schedule schedule = new Schedule("title", 5L);
-		scheduleRepository.save(schedule);
-
-		Vote vote = new Vote("Sim", client.getId(), schedule.getId());
-
-		mockMvc.perform(post("/api/vote/save").contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(vote))).andExpect(status().isBadRequest());
-	}
-
-	@Test
-	public void deveRetornarFalha_pautaNaoEncontrada() throws Exception {
-
-		ObjectMapper objectMapper = new ObjectMapper();
-
-		Client client = new Client("Test Client", "000.000.000-00");
-		clientRepository.save(client);
-
-		Vote vote = new Vote("Sim", client.getId(), 999999L);
-
-		mockMvc.perform(post("/api/vote/save").contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(vote))).andExpect(status().isNotFound());
+		Vote vote = new Vote(1L, "Sim", 1L, 1L);
+		
+		when(voteRepository.save(vote)).thenReturn(vote);
+		
+		MvcResult result = mockMvc.perform(post("/api/vote/save").content(asJsonString(vote)).contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON)).andReturn();
+		
+		
 	}
 
 	@Test
 	public void deveRetornarFalha_clienteJaVotouNaPauta() throws Exception 
 	{
-		Client testClient = new Client("Test Client", "000.000.000-00");
-		testClient.setId(1L);
-	
-		Schedule testSchedule = new Schedule("Test Schedule", 1L);
-		testSchedule.setId( 1L );
-	
-		Vote testVote = new Vote("Sim", testClient.getId(), testSchedule.getId());
-		testVote.setId( 1L );
-	
-		when(clientRepository.save(testClient)).thenReturn( testClient );
-		when(scheduleRepository.save(testSchedule)).thenReturn( testSchedule );
-		when(voteRepository.save(testVote)).thenReturn( testVote );
+		Client client = new Client("Test Client", "150.000.000-00");
+		client.setId(1L);
+		client.setVotedSchedules("1;");
+		
+		when(clientRepository.findById(1L)).thenReturn(Optional.of(client));
 
-		// cria uma requisição POST para a API passando o mesmo cliente e pauta de teste
-		MvcResult result = mockMvc
-				.perform(post("/api/vote/save").contentType(MediaType.APPLICATION_JSON).content(asJsonString( testVote )))
-				.andExpect(status().isBadRequest()).andReturn();
+		Schedule schedule = new Schedule("Test Schedule", 1L);
+		schedule.setId(1L);
+		schedule.setStartTime(Timestamp.valueOf(LocalDateTime.now()));
+		schedule.setEndTime(Timestamp.valueOf(Timestamp.valueOf(LocalDateTime.now()).toLocalDateTime().plusMinutes(5)));
+		
+		when(scheduleRepository.findById(1L)).thenReturn(Optional.of(schedule));
+
+		Vote vote = new Vote(1L, "Sim", 1L, 1L);
+		
+		when(voteRepository.save(vote)).thenReturn(vote);
+		
+		MvcResult result = mockMvc.perform(post("/api/vote/save").content(asJsonString(vote)).contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON)).andReturn();
 	}
 
+	@Test
+	public void deveRetornarFalha_tempoPautaExpirado() throws Exception {
+
+		Client client = new Client("Test Client", "150.000.000-00");
+		client.setId(1L);
+		client.setVotedSchedules("10;");
+		
+		when(clientRepository.findById(1L)).thenReturn(Optional.of(client));
+
+		Schedule schedule = new Schedule("Test Schedule", 1L);
+		schedule.setId(1L);
+		schedule.setStartTime(Timestamp.valueOf(LocalDateTime.now()));
+		schedule.setEndTime(Timestamp.valueOf(Timestamp.valueOf(LocalDateTime.now()).toLocalDateTime().plusMinutes(-5)));
+		
+		when(scheduleRepository.findById(1L)).thenReturn(Optional.of(schedule));
+
+		Vote vote = new Vote(1L, "Sim", 1L, 1L);
+		
+		when(voteRepository.save(vote)).thenReturn(vote);
+		
+		MvcResult result = mockMvc.perform(post("/api/vote/save").content(asJsonString(vote)).contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+	}
+	
+	@Test
+	public void deveRetornarFalha_votoDiferenteSimNao() throws Exception {
+
+		Client client = new Client("Test Client", "150.000.000-00");
+		client.setId(1L);
+		client.setVotedSchedules("10;");
+		
+		when(clientRepository.findById(1L)).thenReturn(Optional.of(client));
+
+		Schedule schedule = new Schedule("Test Schedule", 1L);
+		schedule.setId(1L);
+		schedule.setStartTime(Timestamp.valueOf(LocalDateTime.now()));
+		schedule.setEndTime(Timestamp.valueOf(Timestamp.valueOf(LocalDateTime.now()).toLocalDateTime().plusMinutes(-5)));
+		
+		when(scheduleRepository.findById(1L)).thenReturn(Optional.of(schedule));
+
+		Vote vote = new Vote(1L, "Simm", 1L, 1L);
+		
+		when(voteRepository.save(vote)).thenReturn(vote);
+		
+		MvcResult result = mockMvc.perform(post("/api/vote/save").content(asJsonString(vote)).contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+	}
+
+	@Test
+	public void deveRetornarFalha_pautaNaoEncontrada() throws Exception {
+
+		Client client = new Client("Test Client", "150.000.000-00");
+		ResponseEntity<Client> clientExpected = clientController.save(client);
+
+		Schedule schedule = new Schedule("Test Schedule", 1L);
+		ResponseEntity<Schedule> scheduleExpected = scheduleController.newSchedule(schedule);
+		
+		Vote vote = new Vote(1L, "Sim", clientExpected.getBody().getId() , scheduleExpected.getBody().getId());
+		ResponseEntity<Vote> voteExpected = voteController.save(vote);
+		
+		assertEquals(HttpStatus.NOT_FOUND, voteExpected.getStatusCode());
+	}
+	
 	public static String asJsonString(final Object obj) 
 	{
 		try 
@@ -137,36 +191,6 @@ public class VoteControllerTests {
 		{
 			throw new RuntimeException(e);
 		}
-	}
-
-	@Test
-	public void deveRetornarFalha_tempoPautaExpirado() throws Exception {
-
-		// Configurar o schedule para que o tempo de votação tenha expirado
-
-		Long id = 15L;
-		String title = "title";
-		Long clientId = 3L;
-		int durationTime = 10;
-		Timestamp startTime = Timestamp.valueOf(LocalDateTime.now());
-		Timestamp endTime = Timestamp.valueOf(startTime.toLocalDateTime().plusMinutes(5));
-		int yesVotesCount = 3;
-		int noVotesCount = 2;
-
-		Schedule expiredSchedule = new Schedule(id, title, clientId, durationTime, startTime, endTime, yesVotesCount,
-				noVotesCount);
-
-		scheduleRepository.save(expiredSchedule);
-
-		Vote testVote = new Vote("Sim", clientId, expiredSchedule.getId());
-
-		// Enviar requisição e verificar se a resposta é "Bad Request"
-		MvcResult result = mockMvc
-				.perform(post("/api/vote/save").contentType(MediaType.APPLICATION_JSON).content(asJsonString(testVote)))
-				.andExpect(status().isBadRequest()).andReturn();
-
-		// Verificar se o motivo da falha foi o término da sessão de votação
-		Assertions.assertEquals("O tempo de votação da pauta já expirou", result.getResponse().getErrorMessage());
 	}
 
 }

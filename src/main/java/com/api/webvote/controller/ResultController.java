@@ -23,7 +23,7 @@ public class ResultController {
 	private ScheduleRepository scheduleRepository;
 
 	@GetMapping(path = "/api/schedule/result/{id}")
-	public ResponseEntity<String> ScheduleById(@PathVariable("id") Long id) throws Exception
+	public ResponseEntity<String> save (@PathVariable("id") Long id) throws Exception
 	{
 		Optional<Schedule> schedule = scheduleRepository.findById( id );
 
