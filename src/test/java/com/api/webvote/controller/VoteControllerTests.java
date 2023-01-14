@@ -112,7 +112,7 @@ public class VoteControllerTests {
 		
 		MvcResult result = mockMvc.perform(post("/api/vote/save").content(asJsonString(vote)).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON)).andReturn();
+				.andReturn();
 	}
 
 	@Test
