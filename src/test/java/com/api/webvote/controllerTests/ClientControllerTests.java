@@ -1,18 +1,16 @@
-package com.api.webvote.controller;
+package com.api.webvote.controllerTests;
 
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.standaloneSetup;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -21,13 +19,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
+import com.api.webvote.controller.ClientController;
 import com.api.webvote.model.Client;
 import com.api.webvote.repository.ClientRepository;
 import com.api.webvote.repository.ScheduleRepository;
 import com.api.webvote.repository.VoteRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest
 public class ClientControllerTests {
@@ -47,46 +44,49 @@ public class ClientControllerTests {
 	@MockBean
 	private VoteRepository voteRepository;
 
-	@BeforeEach
-	public void setup() {
-		standaloneSetup(this.clientController);
-	}
+	Client clientMock = new Client(1L, "Client name", "000.000.000-00");
 
 	@Test
 	public void deveRetornarSucesso_QuandoCriarCliente() throws Exception {
-
-		Client client = new Client("Nome do Sujeito", "000.000.000-00");
-
-		ResponseEntity<Client> clientExpected = clientController.save(client);
+		ResponseEntity<Client> clientExpected = clientController.save(clientMock);
 
 		assertEquals(HttpStatus.OK, clientExpected.getStatusCode());
 	}
-
+	
 	@Test
-	public void deveRetornarSucesso_QuandoBuscarCliente() throws Exception 
-	{
-		// cria um cliente de teste e salva no banco de dados mockado
-		Client testClient = new Client();
+	public void deveRetornarFalha_QuandoCpfForInvalido() throws Exception {
+		Client clientMock = new Client(1L, "Nome do Sujeito", "555.666.777-88");
 
-		testClient.setId(1L);
-		testClient.setName("Test Client");
-		testClient.setCpf("000.000.000-00");
+		ResponseEntity<Client> clientExpected = clientController.save(clientMock);
 
-		when(clientRepository.findById(1L)).thenReturn(Optional.of(testClient));
+		assertEquals(HttpStatus.BAD_REQUEST, clientExpected.getStatusCode());
+	}
+	
+	@Test
+	public void deveRetornarFalha_QuandoCpfForDuplicado() throws Exception {
+		List <Client> clientes = new ArrayList<>();
+		clientes.add(clientMock);
+		
+		when(clientRepository.findAll()).thenReturn(clientes);
+		
+		ResponseEntity<Client> clientExpected = clientController.save(clientMock);
 
-		// realiza uma chamada GET para a API passando o ID do cliente de teste
-		MvcResult result = mockMvc.perform(get("/api/client/{id}", testClient.getId()))
-				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON)).andReturn();
-
-		// verifica se o método findById() do repositório de clientes foi chamado com o
-		// ID do cliente de teste
-		verify(clientRepository).findById(testClient.getId());
+		assertEquals(HttpStatus.BAD_REQUEST, clientExpected.getStatusCode());
 	}
 
 	@Test
-	public void deveRetornarFalha_QuandoClienteNaoForEncontrado() throws Exception {
+	public void deveRetornarSucesso_QuandoBuscarCliente() throws Exception {
+		when(clientRepository.findById(1L)).thenReturn(Optional.of(clientMock));
 
+		mockMvc.perform(get("/api/client/{id}", clientMock.getId()))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON)).andReturn();
+
+		verify(clientRepository).findById(clientMock.getId());
+	}
+	
+	@Test
+	public void deveRetornarFalha_QuandoClienteNaoForEncontrado() throws Exception {
 		mockMvc.perform(get("/api/client/{id}", 999999)).andExpect(status().isNotFound());
 	}
 

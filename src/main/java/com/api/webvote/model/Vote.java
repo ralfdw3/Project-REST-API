@@ -5,11 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
-@Data
 @Entity
 public class Vote {
 	
@@ -25,15 +21,32 @@ public class Vote {
 	
 	@Column(nullable = false)
 	private Long scheduleId;
-
-
+	
 	public Vote(Long id, String vote, Long clientId, Long scheduleId) {
-		super();
 		this.id = id;
 		this.vote = vote;
 		this.clientId = clientId;
 		this.scheduleId = scheduleId;
 	}
 	
-	
+	public Vote() {
+		super();
+	}
+
+	public String getVote() {
+		return vote;
+	}
+
+	public Long getClientId() {
+		return clientId;
+	}
+
+	public Long getScheduleId() {
+		return scheduleId;
+	}
+
+	public void setVote(String vote) {
+		this.vote = vote;
+	}
+
 }

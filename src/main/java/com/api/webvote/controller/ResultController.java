@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,37 +16,21 @@ import com.api.webvote.repository.ScheduleRepository;
 @RestController
 public class ResultController {
 	
-	private static final Logger logger = LoggerFactory.getLogger(ScheduleController.class);
+	private static final Logger logger = LoggerFactory.getLogger(ResultController.class);
 	
 	@Autowired
 	private ScheduleRepository scheduleRepository;
 
 	@GetMapping(path = "/api/schedule/result/{id}")
-	public ResponseEntity<String> save (@PathVariable("id") Long id) throws Exception
-	{
+	public ResponseEntity<String> countVotes (@PathVariable("id") Long id) throws Exception{
 		Optional<Schedule> schedule = scheduleRepository.findById( id );
 
-		if( schedule.isEmpty() )
-		{
-			return new ResponseEntity<String>("Schedule not found", HttpStatus.NOT_FOUND);
+		if( schedule == null ){
+			return ResponseEntity.notFound().build();
 		}
 		
-		ResponseEntity<Integer> yesVotesResponse = scheduleRepository.findById(id)
-				.map(record -> ResponseEntity.ok().body(record.getYesVotesCount()))
-						.orElse(ResponseEntity.notFound().build());
-		
-		ResponseEntity<Integer> noVotesResponse = scheduleRepository.findById(id)
-				.map(record -> ResponseEntity.ok().body(record.getNoVotesCount()))
-						.orElse(ResponseEntity.notFound().build());
-		
-		int yesVotes = 0;
-		int noVotes = 0;
-
-		if( yesVotesResponse.getBody() != null )
-			yesVotes = yesVotesResponse.getBody();
-
-		if( noVotesResponse.getBody() != null )
-			noVotes = noVotesResponse.getBody();			
+		int yesVotes = schedule.get().getYesVotesCount();
+		int noVotes = schedule.get().getNoVotesCount();
 
 		int calc = yesVotes + noVotes;
 		

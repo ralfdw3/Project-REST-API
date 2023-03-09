@@ -1,8 +1,5 @@
 package com.api.webvote.controller;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,25 +21,14 @@ public class ScheduleController {
 	
 	@PostMapping(path = "/api/schedule/new")
 	public ResponseEntity<Schedule> newSchedule(@RequestBody Schedule schedule) {
+		String title = schedule.getTitle();
+		Long clientId = schedule.getClientId();
 		
+		if (clientId == null || title == null || title.isEmpty())
+			return ResponseEntity.badRequest().build();
 		
-		int durationTime = schedule.getDurationTime();
-		
-		if (durationTime == 0) {
-			durationTime++;
-		}
-		
-	    // Salva a data e hora atuais como o início da sessão de votação
-	    schedule.setStartTime(Timestamp.valueOf(LocalDateTime.now()));
-
-	    // Calcula a data e hora de término da sessão de votação (1 minuto a partir da data atual)
-	    schedule.setEndTime(Timestamp.valueOf(schedule.getStartTime().toLocalDateTime().plusMinutes(durationTime)));
-	    
-	    // Salva as alterações na pauta no banco de dados
 	    logger.debug("-> Criando nova pauta: " + schedule.getTitle());
-	    
 	    scheduleRepository.save(schedule);
-	    
 	    return ResponseEntity.ok(schedule);
 	}
 
