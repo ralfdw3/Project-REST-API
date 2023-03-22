@@ -1,20 +1,20 @@
-package com.api.webvote.v1.service.client;
+package com.api.webvote.v1.service.check;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.api.webvote.v1.controller.ClientController;
+import com.api.webvote.v1.controller.AssociateController;
 import com.api.webvote.v1.exception.BadRequestException;
-import com.api.webvote.v1.model.Client;
+import com.api.webvote.v1.model.Associate;
 
 public class CpfValidator {
 
-	final static Logger logger = LoggerFactory.getLogger(ClientController.class);
+	final static Logger logger = LoggerFactory.getLogger(AssociateController.class);
 
-	public static void validate(Client client) {
+	public static void validate(Associate associate) {
 		logger.debug("-> Verificando se o CPF é válido.");
 		
-		String cpf = client.getCpf().replaceAll("[^0-9]", "");
+		String cpf = associate.getCpf().replaceAll("[^0-9]", "");
 
 		if (cpf.length() != 11) {
 			throw new BadRequestException("O CPF deve conter 11 dígitos.");

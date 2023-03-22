@@ -25,7 +25,7 @@ import com.api.webvote.v1.controller.ScheduleController;
 import com.api.webvote.v1.exception.BadRequestException;
 import com.api.webvote.v1.model.Schedule;
 import com.api.webvote.v1.model.Vote;
-import com.api.webvote.v1.service.ScheduleServiceInterface;
+import com.api.webvote.v1.service.schedule.ScheduleServiceInterface;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -56,8 +56,8 @@ public class ScheduleControllerTests {
 				LocalDateTime.now().plusMinutes(10));
 		
 		result = "Esta pauta teve um total de 0 votos 'Sim' e 0 votos 'Não'";
-		when(scheduleService.getResults(1L)).thenReturn(ResponseEntity.ok(result));
-		when(scheduleService.getResults(2L)).thenReturn(ResponseEntity.badRequest().build());
+		when(scheduleService.results(1L)).thenReturn(ResponseEntity.ok(result));
+		when(scheduleService.results(2L)).thenReturn(ResponseEntity.badRequest().build());
 	}
 
 	@Test

@@ -1,4 +1,4 @@
-package com.api.webvote.v1.service.schedule;
+package com.api.webvote.v1.service.check;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

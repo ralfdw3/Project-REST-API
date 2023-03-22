@@ -1,15 +1,16 @@
 package com.api.webvote.v1.service.vote;
 
+import com.api.webvote.v1.service.check.CheckExpiration;
+import com.api.webvote.v1.service.check.CheckResponse;
+import com.api.webvote.v1.service.check.CheckVotes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.api.webvote.v1.exception.BadRequestException;
-import com.api.webvote.v1.model.Client;
+import com.api.webvote.v1.model.Associate;
 import com.api.webvote.v1.model.Schedule;
 import com.api.webvote.v1.model.Vote;
 import com.api.webvote.v1.repository.VoteRepository;
-import com.api.webvote.v1.service.VoteServiceInterface;
 
 import jakarta.transaction.Transactional;
 
@@ -27,18 +28,12 @@ public class VoteService implements VoteServiceInterface {
 	@Override
 	public ResponseEntity<Vote> save(Vote vote) {
 		Schedule schedule = vote.getSchedule();
-		Client client = vote.getClient();
+		Associate client = vote.getAssociate();
 
-		try {
-			CheckExpiration.check(schedule);
-			CheckResponse.check(vote);
-			CheckVotes.check(client, schedule);
-			
-		} catch (BadRequestException e) {
-			return ResponseEntity.badRequest().build();
+		CheckExpiration.check(schedule);
+		CheckResponse.check(vote);
+		CheckVotes.check(client, schedule);
 
-		} 
-		
 		schedule.getVotes().add(vote);
 		voteRepository.save(vote);
 		return ResponseEntity.ok().build();

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.api.webvote.v1.model.Schedule;
-import com.api.webvote.v1.service.ScheduleServiceInterface;
+import com.api.webvote.v1.service.schedule.ScheduleServiceInterface;
 
 import jakarta.validation.Valid;
 
@@ -21,14 +21,14 @@ public class ScheduleController {
 	@Autowired
 	private ScheduleServiceInterface scheduleServiceInterface;
 
-	@PostMapping(path = "/new")
+	@PostMapping
 	public ResponseEntity<Schedule> newSchedule(@Valid @RequestBody Schedule schedule) {
 		return scheduleServiceInterface.save(schedule);
 	}
 	
 	@GetMapping(path = "/{id}")
-	public ResponseEntity<String> getResults (@PathVariable("id") Long id) throws Exception{
-		return scheduleServiceInterface.getResults(id);
+	public ResponseEntity<String> results (@PathVariable("id") Long id) throws Exception{
+		return scheduleServiceInterface.results(id);
 	}
 
 }

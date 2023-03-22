@@ -23,10 +23,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.api.webvote.v1.controller.VoteController;
 import com.api.webvote.v1.enums.VotoEnum;
 import com.api.webvote.v1.exception.BadRequestException;
-import com.api.webvote.v1.model.Client;
+import com.api.webvote.v1.model.Associate;
 import com.api.webvote.v1.model.Schedule;
 import com.api.webvote.v1.model.Vote;
-import com.api.webvote.v1.service.VoteServiceInterface;
+import com.api.webvote.v1.service.vote.VoteServiceInterface;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -41,33 +41,33 @@ public class VoteControllerTests {
 
 	@MockBean
 	private VoteServiceInterface voteService;
-	
+
 	private Vote voteMock;
-	private Client clientMock;
+	private Associate clientMock;
 	private Schedule scheduleMock;
 
 	@BeforeEach
 	public void inicialize() {
-		
+
 		List<Vote> votes = new ArrayList<Vote>();
-		clientMock = new Client(1L, "Ralf Drehmer Wink", "000.000.000-00");
+		clientMock = new Associate(1L, "Ralf Drehmer Wink", "000.000.000-00");
 
 		scheduleMock = new Schedule(1L, "Schedule title", votes, 1, LocalDateTime.now(),
 				LocalDateTime.now().plusMinutes(1));
 
 		voteMock = new Vote(1L, VotoEnum.SIM, clientMock, scheduleMock);
-		
+
 		when(voteService.save(voteMock)).thenReturn(ResponseEntity.ok().build());
 	}
 
 	@Test
 	public void deveRetornarSucesso_salvaNovoCliente() throws Exception {
-		mockMvc.perform(post("/v1/api/vote/new")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(voteMock)))
-		.andExpect(status().isOk());
+
+		mockMvc.perform(
+				post("/v1/api/vote/new").contentType(MediaType.APPLICATION_JSON).content(asJsonString(voteMock)))
+				.andExpect(status().isOk());
+
 	}
-	
 
 	public static String asJsonString(final Object obj) {
 		try {

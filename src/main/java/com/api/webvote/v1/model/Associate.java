@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "client", schema = "webvote")
-public class Client {
+public class Associate {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,11 +21,11 @@ public class Client {
 	@Column(nullable = false)
 	private String cpf;
 	
-	public Client() {
+	public Associate() {
 		super();
 	}
 
-	public Client(Long id, String name, String cpf) {
+	public Associate(Long id, String name, String cpf) {
 		this.id = id;
 		this.name = name;
 		this.cpf = cpf;

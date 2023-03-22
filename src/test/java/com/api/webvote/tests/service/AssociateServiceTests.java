@@ -20,76 +20,76 @@ import org.springframework.http.ResponseEntity;
 
 import com.api.webvote.v1.exception.BadRequestException;
 import com.api.webvote.v1.exception.NotFoundException;
-import com.api.webvote.v1.model.Client;
-import com.api.webvote.v1.repository.ClientRepository;
-import com.api.webvote.v1.service.client.CheckDuplicateCpf;
-import com.api.webvote.v1.service.client.ClientService;
-import com.api.webvote.v1.service.client.CpfValidator;
+import com.api.webvote.v1.model.Associate;
+import com.api.webvote.v1.repository.AssociateRepository;
+import com.api.webvote.v1.service.check.CheckDuplicateCpf;
+import com.api.webvote.v1.service.associate.AssociateService;
+import com.api.webvote.v1.service.check.CpfValidator;
 
-public class ClientServiceTests {
+public class AssociateServiceTests {
 
 	@InjectMocks
-	private ClientService clientService;
+	private AssociateService clientService;
 
 	@Mock
-	private ClientRepository clientRepository;
+	private AssociateRepository associateRepository;
 
 	@BeforeEach
 	public void conditions() {
 		openMocks(this);
-		when(clientRepository.save(clientMock)).thenReturn(clientMock);
-		when(clientRepository.findAll()).thenReturn(clients);
-		when(clientRepository.findById(1L)).thenReturn(Optional.of(clientMock));
-		when(clientRepository.findById(2L)).thenThrow(NotFoundException.class);
+		when(associateRepository.save(clientMock)).thenReturn(clientMock);
+		when(associateRepository.findAll()).thenReturn(clients);
+		when(associateRepository.findById(1L)).thenReturn(Optional.of(clientMock));
+		when(associateRepository.findById(2L)).thenThrow(NotFoundException.class);
 	}
 
 	// Variáveis mocks
-	Client clientMock = new Client(1L, "Ralf Drehmer Wink", "000.000.000-00");
-	List<Client> clients = new ArrayList<Client>();
+	Associate clientMock = new Associate(1L, "Ralf Drehmer Wink", "000.000.000-00");
+	List<Associate> clients = new ArrayList<Associate>();
 	
 	@Test
 	public void deveRetornarSucesso_novoCliente() throws Exception {
-		ResponseEntity<Client> response = clientService.save(clientMock);
+		ResponseEntity<Associate> response = clientService.save(clientMock);
 
 		assertEquals(response, ResponseEntity.ok().build());
-		verify(clientRepository, times(1)).save(any(Client.class));
+		verify(associateRepository, times(1)).save(any(Associate.class));
 	}
 
 	@Test
 	public void deveRetornarFalha_cpfJaCadastrado() throws Exception {
 		clients.add(clientMock);
 
-		ResponseEntity<Client> response = clientService.save(clientMock);
+		ResponseEntity<Associate> response = clientService.save(clientMock);
 
 		assertEquals(ResponseEntity.badRequest().build(), response);
-		assertThrows(BadRequestException.class, () -> CheckDuplicateCpf.validate(clientMock, clients));
-		verify(clientRepository, times(0)).save(any(Client.class));
+		assertThrows(BadRequestException.class, () -> CheckDuplicateCpf.validate(clientMock));
+		verify(associateRepository, times(0)).save(any(Associate.class));
 	}
 
 	@Test
 	public void deveRetornarFalha_cpfInvalido() throws Exception {
-		Client clientMock = new Client(1L, "Ralf Drehmer Wink", "035.592.500-15");
+		Associate clientMock = new Associate(1L, "Ralf Drehmer Wink", "035.592.500-15");
 
-		ResponseEntity<Client> response = clientService.save(clientMock);
+		ResponseEntity<Associate> response = clientService.save(clientMock);
 
 		assertEquals(ResponseEntity.badRequest().build(), response);
 		assertThrows(BadRequestException.class, () -> CpfValidator.validate(clientMock));
-		verify(clientRepository, times(0)).save(any(Client.class));
+		verify(associateRepository, times(0)).save(any(Associate.class));
 	}
 	
 	@Test
 	public void deveRetornarSucesso_QuandoBuscarUmCliente() throws Exception {
 
-		ResponseEntity<Client> response = clientService.get(1L);
+		ResponseEntity<Associate> response = clientService.get(1L);
 		assertEquals(response, ResponseEntity.ok(clientMock));
-		verify(clientRepository, times(1)).findById(any());
+		verify(associateRepository, times(1)).findById(any());
 	}
 	
 	@Test
 	public void deveRetornarFalha_QuandoBuscarOResultadoDeUmaPauta() throws Exception {
 
 		assertThrows(NotFoundException.class, () -> clientService.get(2L));
-		verify(clientRepository, times(1)).findById(any());
+		verify(associateRepository, times(1)).findById(any());
 	}
 
 }

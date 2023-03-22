@@ -32,9 +32,9 @@ public class Schedule {
 	private List<Vote> votes;
 	
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private int duration = 1;
+	private int duration;
 	private LocalDateTime start = LocalDateTime.now();
-	private LocalDateTime end;
+	private LocalDateTime end = LocalDateTime.now().plusMinutes(1);
 
 	public Schedule() {
 		super();

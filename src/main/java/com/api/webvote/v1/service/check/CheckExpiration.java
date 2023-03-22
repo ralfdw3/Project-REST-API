@@ -1,4 +1,4 @@
-package com.api.webvote.v1.service.vote;
+package com.api.webvote.v1.service.check;
 
 import java.time.LocalDateTime;
 

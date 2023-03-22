@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.api.webvote.v1.model.Vote;
-import com.api.webvote.v1.service.VoteServiceInterface;
+import com.api.webvote.v1.service.vote.VoteServiceInterface;
 
 import jakarta.validation.Valid;
 
@@ -19,9 +19,8 @@ public class VoteController {
 	@Autowired
 	private VoteServiceInterface voteServiceInterface;
 
-	@PostMapping(path = "/new")
+	@PostMapping
 	public ResponseEntity<Vote> newVote (@Valid @RequestBody Vote vote) {
-		
 		return voteServiceInterface.save(vote);
 	}
 

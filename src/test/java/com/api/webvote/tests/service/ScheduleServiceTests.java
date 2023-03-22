@@ -80,7 +80,7 @@ public class ScheduleServiceTests {
 	@Test
 	public void deveRetornarSucesso_QuandoBuscarOResultadoDeUmaPauta() throws Exception {
 
-		ResponseEntity<String> response = scheduleService.getResults(1L);
+		ResponseEntity<String> response = scheduleService.results(1L);
 		String result = "Esta pauta teve um total de 0 votos 'Sim' e 0 votos 'Não'";
 		assertEquals(response, ResponseEntity.ok(result));
 	}
@@ -88,7 +88,7 @@ public class ScheduleServiceTests {
 	@Test
 	public void deveRetornarFalha_QuandoBuscarOResultadoDeUmaPauta() throws Exception {
 
-		assertThrows(NotFoundException.class, () -> scheduleService.getResults(2L));
+		assertThrows(NotFoundException.class, () -> scheduleService.results(2L));
 	}
 
 }

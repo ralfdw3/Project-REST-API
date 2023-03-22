@@ -1,4 +1,4 @@
-package com.api.webvote.v1.service;
+package com.api.webvote.v1.service.vote;
 
 import org.springframework.http.ResponseEntity;
 

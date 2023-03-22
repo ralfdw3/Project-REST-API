@@ -9,30 +9,30 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.api.webvote.v1.model.Client;
-import com.api.webvote.v1.service.ClientServiceInterface;
+import com.api.webvote.v1.model.Associate;
+import com.api.webvote.v1.service.associate.AssociateServiceInterface;
 
 import jakarta.validation.Valid;
 
 @RequestMapping("v1/api/client")
 @RestController
-public class ClientController {
+public class AssociateController {
 
-	private final ClientServiceInterface clientServiceInterface;
+	private final AssociateServiceInterface associateServiceInterface;
 	
 	@Autowired
-	public ClientController(ClientServiceInterface clientServiceInterface) {
-		this.clientServiceInterface = clientServiceInterface;
+	public AssociateController(AssociateServiceInterface associateServiceInterface) {
+		this.associateServiceInterface = associateServiceInterface;
 	}
 
 	@GetMapping(path = "/{id}")
-	public ResponseEntity<Client> clientById(@PathVariable("id") Long id) {
-		return clientServiceInterface.get(id);
+	public ResponseEntity<Associate> associateById(@PathVariable("id") Long id) {
+		return associateServiceInterface.get(id);
 	}
 
-	@PostMapping(path = "/new")
-	public ResponseEntity<Client> newClient (@Valid @RequestBody Client client) {
-		return clientServiceInterface.save(client);
+	@PostMapping
+	public ResponseEntity<Associate> newAssociate (@Valid @RequestBody Associate associate) {
+		return associateServiceInterface.save(associate);
 		
 	}
 
