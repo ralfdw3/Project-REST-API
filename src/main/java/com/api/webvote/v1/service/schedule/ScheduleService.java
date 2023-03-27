@@ -1,15 +1,13 @@
 package com.api.webvote.v1.service.schedule;
 
-import com.api.webvote.v1.service.check.CheckTitle;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
 import com.api.webvote.v1.enums.VotoEnum;
 import com.api.webvote.v1.model.Schedule;
 import com.api.webvote.v1.repository.ScheduleRepository;
-
+import com.api.webvote.v1.service.check.CheckTitle;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
 @Service
 public class ScheduleService implements ScheduleServiceInterface {
@@ -24,13 +22,10 @@ public class ScheduleService implements ScheduleServiceInterface {
 	@Transactional
 	@Override
 	public ResponseEntity<Schedule> save (Schedule schedule) {
-		CheckTitle.check(schedule);
-		
-		// Define a duracao da pauta
-		schedule.setEnd(schedule.getStart().plusMinutes(schedule.getDuration()));
-		
+		CheckTitle.check(schedule.getTitle());
+
 		scheduleRepository.save(schedule);
-		return ResponseEntity.ok().build();
+		return ResponseEntity.ok(schedule);
 
 	}
 

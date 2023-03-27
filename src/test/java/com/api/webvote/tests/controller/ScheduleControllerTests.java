@@ -1,14 +1,9 @@
 package com.api.webvote.tests.controller;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.api.webvote.tests.config.Convert;
+import com.api.webvote.v1.controller.ScheduleController;
+import com.api.webvote.v1.model.Schedule;
+import com.api.webvote.v1.service.schedule.ScheduleServiceInterface;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,14 +16,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.api.webvote.v1.controller.ScheduleController;
-import com.api.webvote.v1.exception.BadRequestException;
-import com.api.webvote.v1.model.Schedule;
-import com.api.webvote.v1.model.Vote;
-import com.api.webvote.v1.service.schedule.ScheduleServiceInterface;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(ScheduleController.class)
@@ -37,54 +28,45 @@ public class ScheduleControllerTests {
 
 	@Autowired
 	private MockMvc mockMvc;
-
 	@MockBean
 	private ScheduleServiceInterface scheduleService;
-
 	private Schedule scheduleMock;
-	private String result;
 
 	@BeforeEach
 	public void inicialize() {
-		List<Vote> votes = new ArrayList<Vote>();
-		scheduleMock = new Schedule(
-				1L, 
-				"Pauta 1", 
-				votes,
-				10, 
-				LocalDateTime.now(), 
-				LocalDateTime.now().plusMinutes(10));
+		scheduleMock = new Schedule();
+		scheduleMock.setTitle("Titulo da pauta");
 		
-		result = "Esta pauta teve um total de 0 votos 'Sim' e 0 votos 'Não'";
-		when(scheduleService.results(1L)).thenReturn(ResponseEntity.ok(result));
-		when(scheduleService.results(2L)).thenReturn(ResponseEntity.badRequest().build());
+		when(scheduleService.results(1L)).thenReturn(ResponseEntity.ok().build());
+		when(scheduleService.results(99999L)).thenReturn(ResponseEntity.notFound().build());
 	}
 
 	@Test
-	public void deveRetornarSucesso_CriarNovoSchedule() throws Exception {
-		mockMvc.perform(
-				post("/v1/api/schedule/new")
+	public void deveRetornarSucesso_aoCriarNovaPauta() throws Exception{
+		mockMvc.perform(post("/v1/api/schedule")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(scheduleMock)))
+				.content(Convert.asJsonString(scheduleMock)))
 				.andExpect(status().isOk());
-
 	}
-	
+
 	@Test
-	public void deveRetornarSucesso_buscaPautaPelaId() throws Exception {
+	public void deveRetornarFalha_aoCriarNovaPauta() throws Exception{
+		mockMvc.perform(post("/v1/api/schedule")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(Convert.asJsonString(null)))
+				.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	public void deveRetornarSucesso_aoBuscarResultadosDaPautaPeloId() throws Exception {
 		mockMvc.perform(get("/v1/api/schedule/{id}", 1L))
 		.andExpect(status().isOk());
 	}
 
-
-	public static String asJsonString(final Object obj) {
-		try {
-			ObjectMapper objectMapper = new ObjectMapper();
-			objectMapper.registerModule(new JavaTimeModule());
-			return objectMapper.writeValueAsString(obj);
-		} catch (JsonProcessingException e) {
-			throw new BadRequestException(e.toString());
-		}
+	@Test
+	public void deveRetornarFalha_aoBuscarResultadosDaPautaPeloIdInvalido() throws Exception {
+		mockMvc.perform(get("/v1/api/schedule/{id}", 99999L))
+				.andExpect(status().isNotFound());
 	}
 
 }

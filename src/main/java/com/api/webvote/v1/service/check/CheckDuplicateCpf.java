@@ -1,27 +1,22 @@
 package com.api.webvote.v1.service.check;
 
-import java.util.List;
-
+import com.api.webvote.v1.controller.AssociateController;
+import com.api.webvote.v1.exception.BadRequestException;
+import com.api.webvote.v1.model.Associate;
 import com.api.webvote.v1.repository.AssociateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.api.webvote.v1.controller.AssociateController;
-import com.api.webvote.v1.exception.BadRequestException;
-import com.api.webvote.v1.model.Associate;
-import org.springframework.beans.factory.annotation.Autowired;
-
 public class CheckDuplicateCpf {
 
-    private static AssociateRepository associateRepository;
     final static Logger logger = LoggerFactory.getLogger(AssociateController.class);
 
-    public static void validate(Associate associate) {
+    public static void validate(String cpf, AssociateRepository associateRepository) {
         logger.debug("-> Verificando a existencia de CPF duplicado no banco de dados.");
 
-		List<Associate> list = associateRepository.findByCpf(associate.getCpf());
+		Associate associate  = associateRepository.findByCpf(cpf);
 
-        if (!list.isEmpty())
+        if (associate != null)
             throw new BadRequestException("Este CPF já está sendo utilizado");
     }
 }

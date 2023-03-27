@@ -1,8 +1,7 @@
 package com.api.webvote.v1.service.associate;
 
-import org.springframework.http.ResponseEntity;
-
 import com.api.webvote.v1.model.Associate;
+import org.springframework.http.ResponseEntity;
 
 public interface AssociateServiceInterface {
 	

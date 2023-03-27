@@ -1,29 +1,27 @@
 package com.api.webvote.tests.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.openMocks;
+import com.api.webvote.v1.exception.BadRequestException;
+import com.api.webvote.v1.exception.NotFoundException;
+import com.api.webvote.v1.model.Schedule;
+import com.api.webvote.v1.model.Vote;
+import com.api.webvote.v1.repository.ScheduleRepository;
+import com.api.webvote.v1.service.check.CheckTitle;
+import com.api.webvote.v1.service.schedule.ScheduleService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.http.ResponseEntity;
-
-import com.api.webvote.v1.exception.NotFoundException;
-import com.api.webvote.v1.model.Schedule;
-import com.api.webvote.v1.model.Vote;
-import com.api.webvote.v1.repository.ScheduleRepository;
-import com.api.webvote.v1.service.schedule.ScheduleService;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 public class ScheduleServiceTests {
 
@@ -48,46 +46,33 @@ public class ScheduleServiceTests {
 			LocalDateTime.now().plusMinutes(1));
 
 	@Test
-	public void deveRetornarSucesso_CriarNovoSchedule() throws Exception {
-		ResponseEntity<Schedule> response = scheduleService.save(scheduleMock);
-
-		verify(scheduleRepository, times(1)).save(any(Schedule.class));
-		assertEquals(response, ResponseEntity.ok().build());
-
+	public void deveRetornarSucesso_aoCriarNovoSchedule() throws Exception {
+		assertEquals(HttpStatus.OK, scheduleService.save(scheduleMock).getStatusCode());
 	}
 
 	@Test
-	public void deveRetornarFalha_CriarScheduleComTituloNull() throws Exception {
-		Schedule scheduleMock = new Schedule(1L, null, votes, 1, LocalDateTime.now(),
-				LocalDateTime.now().plusMinutes(1));
-
-		ResponseEntity<Schedule> response = scheduleService.save(scheduleMock);
-
-		verify(scheduleRepository, times(0)).save(any(Schedule.class));
-		assertEquals(response, ResponseEntity.badRequest().build());
+	public void deveRetornarSucesso_aoCriarScheduleComTituloValido() throws Exception {
+		assertDoesNotThrow(() -> CheckTitle.check(scheduleMock.getTitle()));
+	}
+	@Test
+	public void deveRetornarFalha_aoCriarScheduleComTituloNull() throws Exception {
+		scheduleMock.setTitle(null);
+		assertThrows(BadRequestException.class, () -> CheckTitle.check(scheduleMock.getTitle()));
 	}
 
 	@Test
-	public void deveRetornarFalha_CriarScheduleComTituloEmpty() throws Exception {
-		Schedule scheduleMock = new Schedule(1L, "", votes, 1, LocalDateTime.now(), LocalDateTime.now().plusMinutes(1));
-
-		ResponseEntity<Schedule> response = scheduleService.save(scheduleMock);
-
-		verify(scheduleRepository, times(0)).save(any(Schedule.class));
-		assertEquals(response, ResponseEntity.badRequest().build());
+	public void deveRetornarFalha_aoCriarScheduleComTituloEmpty() throws Exception {
+		scheduleMock.setTitle("");
+		assertThrows(BadRequestException.class, () -> CheckTitle.check(scheduleMock.getTitle()));
 	}
 	
 	@Test
-	public void deveRetornarSucesso_QuandoBuscarOResultadoDeUmaPauta() throws Exception {
-
-		ResponseEntity<String> response = scheduleService.results(1L);
-		String result = "Esta pauta teve um total de 0 votos 'Sim' e 0 votos 'Não'";
-		assertEquals(response, ResponseEntity.ok(result));
+	public void deveRetornarSucesso_aoBuscarOResultadoDeUmaPauta() throws Exception {
+		assertEquals("Esta pauta teve um total de 0 votos 'Sim' e 0 votos 'Não'", scheduleService.results(1L).getBody());
 	}
 	
 	@Test
-	public void deveRetornarFalha_QuandoBuscarOResultadoDeUmaPauta() throws Exception {
-
+	public void deveRetornarFalha_aoBuscarOResultadoDeUmaPautaComIdInvalido() throws Exception {
 		assertThrows(NotFoundException.class, () -> scheduleService.results(2L));
 	}
 

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.sql.SQLIntegrityConstraintViolationException;
 
 @RestControllerAdvice
-public class ErrosHandler {
+public class ErrorsHandler {
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity error400(Exception ex){
@@ -24,5 +24,10 @@ public class ErrosHandler {
     @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
     public ResponseEntity errorSQL (SQLIntegrityConstraintViolationException ex) {
         return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity errorNullPointer (NullPointerException ex) {
+        return ResponseEntity.notFound().build();
     }
 }

@@ -1,15 +1,13 @@
 package com.api.webvote.v1.service.associate;
 
+import com.api.webvote.v1.model.Associate;
+import com.api.webvote.v1.repository.AssociateRepository;
 import com.api.webvote.v1.service.check.CheckDuplicateCpf;
 import com.api.webvote.v1.service.check.CpfValidator;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import com.api.webvote.v1.model.Associate;
-import com.api.webvote.v1.repository.AssociateRepository;
-
-import jakarta.transaction.Transactional;
 
 @Service
 public class AssociateService implements AssociateServiceInterface {
@@ -24,12 +22,13 @@ public class AssociateService implements AssociateServiceInterface {
 	@Transactional
 	@Override
 	public ResponseEntity<Associate> save(Associate associate) {
+		String cpf = associate.getCpf();
 
-		CheckDuplicateCpf.validate(associate);
-		CpfValidator.validate(associate);
+		CpfValidator.validate(cpf);
+		CheckDuplicateCpf.validate(cpf, associateRepository);
 
-		associateRepository.save(associate);
-		return ResponseEntity.ok().build();
+		Associate savedAssociate = associateRepository.save(associate);
+		return ResponseEntity.ok(savedAssociate);
 	}
 
 	@Override

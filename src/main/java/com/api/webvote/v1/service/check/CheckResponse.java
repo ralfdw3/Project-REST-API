@@ -1,12 +1,11 @@
 package com.api.webvote.v1.service.check;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.api.webvote.v1.controller.VoteController;
 import com.api.webvote.v1.enums.VotoEnum;
 import com.api.webvote.v1.exception.BadRequestException;
 import com.api.webvote.v1.model.Vote;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CheckResponse {
 	

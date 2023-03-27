@@ -1,18 +1,7 @@
 package com.api.webvote.v1.model;
 
 import com.api.webvote.v1.enums.VotoEnum;
-import com.api.webvote.v1.service.check.ScheduleDeserializer;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 
 @Entity
 public class Vote {
@@ -25,12 +14,10 @@ public class Vote {
     @Enumerated(EnumType.STRING)
     private VotoEnum vote;
 	
-	//@JsonDeserialize(using = AssociateDeserializer.class)
 	@OneToOne
     @JoinColumn(name = "associate_id", nullable = false)
 	private Associate associate;
 	
-	@JsonDeserialize(using = ScheduleDeserializer.class)
 	@OneToOne
 	@JoinColumn(name = "schedule_id", nullable = false)
 	private Schedule schedule;

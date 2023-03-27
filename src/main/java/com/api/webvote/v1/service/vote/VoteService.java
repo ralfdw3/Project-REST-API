@@ -1,18 +1,16 @@
 package com.api.webvote.v1.service.vote;
 
-import com.api.webvote.v1.service.check.CheckExpiration;
-import com.api.webvote.v1.service.check.CheckResponse;
-import com.api.webvote.v1.service.check.CheckVotes;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
 import com.api.webvote.v1.model.Associate;
 import com.api.webvote.v1.model.Schedule;
 import com.api.webvote.v1.model.Vote;
 import com.api.webvote.v1.repository.VoteRepository;
-
+import com.api.webvote.v1.service.check.CheckExpiration;
+import com.api.webvote.v1.service.check.CheckResponse;
+import com.api.webvote.v1.service.check.CheckVotes;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
 @Service
 public class VoteService implements VoteServiceInterface {

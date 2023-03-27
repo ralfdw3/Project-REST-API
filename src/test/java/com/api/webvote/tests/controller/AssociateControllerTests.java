@@ -1,11 +1,9 @@
 package com.api.webvote.tests.controller;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import com.api.webvote.tests.config.Convert;
+import com.api.webvote.v1.controller.AssociateController;
+import com.api.webvote.v1.model.Associate;
+import com.api.webvote.v1.service.associate.AssociateServiceInterface;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,13 +16,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.api.webvote.v1.controller.AssociateController;
-import com.api.webvote.v1.exception.BadRequestException;
-import com.api.webvote.v1.model.Associate;
-import com.api.webvote.v1.service.associate.AssociateServiceInterface;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(AssociateController.class)
@@ -41,14 +37,14 @@ public class AssociateControllerTests {
 
 	@BeforeEach
 	public void inicialize() {
-		associate = new Associate(1L, "Ralf", "035.592.500-15");
+		associate = new Associate(1L, "Ralf", "000.000.000-00");
 		when(clientService.get(1L)).thenReturn(ResponseEntity.ok(associate));
-		when(clientService.get(2L)).thenReturn(ResponseEntity.badRequest().build());
+		when(clientService.get(99999L)).thenReturn(ResponseEntity.notFound().build());
 	}
 
 	@Test
-	public void deveRetornarSucesso_buscaClientePelaId() throws Exception {
-		mockMvc.perform(get("/v1/api/client/{id}", 1L))
+	public void deveRetornarSucesso_aoBuscarAssociadoPelaId() throws Exception {
+		mockMvc.perform(get("/v1/api/associate/{id}", 1L))
 		.andExpect(status().isOk())
 		.andExpect(jsonPath("$.id").value(associate.getId()))
 		.andExpect(jsonPath("$.name").value("Ralf"))
@@ -56,27 +52,24 @@ public class AssociateControllerTests {
 	}
 
 	@Test
-	public void deveRetornarSucesso_salvaNovoCliente() throws Exception {
-		mockMvc.perform(post("/v1/api/client/new")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(associate)))
-		.andExpect(status().isOk());
+	public void deveRetornarFalha_aoBuscarAssociadoComIdInvalido() throws Exception {
+		mockMvc.perform(get("/v1/api/associate/{id}", 99999L))
+				.andExpect(status().isNotFound());
 	}
-	
 	@Test
-	public void deveRetornarFalha_buscaClienteComIdInvalido() throws Exception {
-		mockMvc.perform(get("/v1/api/client/{id}", 2L))
-		.andExpect(status().isBadRequest());
+	public void deveRetornarSucesso_aoCriarNovoAssociado() throws Exception {
+		mockMvc.perform(post("/v1/api/associate")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(Convert.asJsonString(associate)))
+				.andExpect(status().isOk());
 	}
 
-	public static String asJsonString(final Object obj) {
-		try {
-			ObjectMapper objectMapper = new ObjectMapper();
-			objectMapper.registerModule(new JavaTimeModule());
-			return objectMapper.writeValueAsString(obj);
-		} catch (JsonProcessingException e) {
-			throw new BadRequestException(e.toString());
-		}
+	@Test
+	public void deveRetornarFalha_aoCriarNovoAssociado() throws Exception {
+		mockMvc.perform(post("/v1/api/associate")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(Convert.asJsonString(null)))
+						.andExpect(status().isBadRequest());
 	}
 
 }
