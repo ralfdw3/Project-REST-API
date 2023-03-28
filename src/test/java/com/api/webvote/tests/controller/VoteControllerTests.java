@@ -1,6 +1,7 @@
 package com.api.webvote.tests.controller;
 
 import com.api.webvote.tests.config.Convert;
+import com.api.webvote.tests.stubs.VoteStub;
 import com.api.webvote.v1.controller.VoteController;
 import com.api.webvote.v1.enums.VotoEnum;
 import com.api.webvote.v1.model.Associate;
@@ -34,40 +35,20 @@ public class VoteControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
-
     @MockBean
     private VoteServiceInterface voteService;
-
-    private Vote voteMock;
-    private Associate clientMock;
-    private Schedule scheduleMock;
-
-    @BeforeEach
-    public void inicialize() {
-
-        List<Vote> votes = new ArrayList<Vote>();
-        clientMock = new Associate(1L, "Ralf Drehmer Wink", "000.000.000-00");
-
-        scheduleMock = new Schedule(1L, "Schedule title", votes, 1, LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(1));
-
-        voteMock = new Vote(1L, VotoEnum.SIM, clientMock, scheduleMock);
-
-        when(voteService.save(voteMock)).thenReturn(ResponseEntity.ok().build());
-    }
+    private Vote voteDefault = VoteStub.voteDefault();
 
     @Test
     public void deveRetornarSucesso_aoVotarEmUmaPauta() throws Exception {
-
         mockMvc.perform(post("/v1/api/vote")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(Convert.asJsonString(voteMock)))
+                .content(Convert.asJsonString(voteDefault)))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void deveRetornarFalha_aoVotarEmUmaPauta() throws Exception {
-
         mockMvc.perform(post("/v1/api/vote")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(Convert.asJsonString(null)))

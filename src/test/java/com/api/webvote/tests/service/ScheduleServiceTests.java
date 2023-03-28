@@ -1,5 +1,6 @@
 package com.api.webvote.tests.service;
 
+import com.api.webvote.tests.stubs.ScheduleStub;
 import com.api.webvote.v1.exception.BadRequestException;
 import com.api.webvote.v1.exception.NotFoundException;
 import com.api.webvote.v1.model.Schedule;
@@ -13,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.http.HttpStatus;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,39 +31,34 @@ public class ScheduleServiceTests {
 	@Mock
 	private ScheduleRepository scheduleRepository;
 
+	private Schedule scheduleDefault = ScheduleStub.scheduleDefault();
+
 	@BeforeEach
 	public void conditions() {
 		openMocks(this);
-		when(scheduleRepository.save(scheduleMock)).thenReturn(scheduleMock);
-		when(scheduleRepository.findById(1L)).thenReturn(Optional.of(scheduleMock));
-		when(scheduleRepository.findById(2L)).thenThrow(NotFoundException.class);
+		when(scheduleRepository.save(scheduleDefault)).thenReturn(scheduleDefault);
+		when(scheduleRepository.findById(1L)).thenReturn(Optional.of(scheduleDefault));
 	}
-
-	// Variáveis mocks
-	List<Vote> votes = new ArrayList<Vote>();
-
-	Schedule scheduleMock = new Schedule(1L, "Schedule title", votes, 1, LocalDateTime.now(),
-			LocalDateTime.now().plusMinutes(1));
 
 	@Test
 	public void deveRetornarSucesso_aoCriarNovoSchedule() throws Exception {
-		assertEquals(HttpStatus.OK, scheduleService.save(scheduleMock).getStatusCode());
+		assertEquals(HttpStatus.OK, scheduleService.save(scheduleDefault).getStatusCode());
 	}
 
 	@Test
 	public void deveRetornarSucesso_aoCriarScheduleComTituloValido() throws Exception {
-		assertDoesNotThrow(() -> CheckTitle.check(scheduleMock.getTitle()));
+		assertDoesNotThrow(() -> CheckTitle.check(scheduleDefault.getTitle()));
 	}
 	@Test
 	public void deveRetornarFalha_aoCriarScheduleComTituloNull() throws Exception {
-		scheduleMock.setTitle(null);
-		assertThrows(BadRequestException.class, () -> CheckTitle.check(scheduleMock.getTitle()));
+		scheduleDefault.setTitle(null);
+		assertThrows(BadRequestException.class, () -> CheckTitle.check(scheduleDefault.getTitle()));
 	}
 
 	@Test
 	public void deveRetornarFalha_aoCriarScheduleComTituloEmpty() throws Exception {
-		scheduleMock.setTitle("");
-		assertThrows(BadRequestException.class, () -> CheckTitle.check(scheduleMock.getTitle()));
+		scheduleDefault.setTitle("");
+		assertThrows(BadRequestException.class, () -> CheckTitle.check(scheduleDefault.getTitle()));
 	}
 	
 	@Test
@@ -73,7 +68,9 @@ public class ScheduleServiceTests {
 	
 	@Test
 	public void deveRetornarFalha_aoBuscarOResultadoDeUmaPautaComIdInvalido() throws Exception {
-		assertThrows(NotFoundException.class, () -> scheduleService.results(2L));
+		when(scheduleRepository.findById(any())).thenThrow(NotFoundException.class);
+
+		assertThrows(NotFoundException.class, () -> scheduleService.results(any()));
 	}
 
 }

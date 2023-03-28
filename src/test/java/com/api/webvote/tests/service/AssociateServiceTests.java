@@ -1,5 +1,6 @@
 package com.api.webvote.tests.service;
 
+import com.api.webvote.tests.stubs.AssociateStub;
 import com.api.webvote.v1.exception.BadRequestException;
 import com.api.webvote.v1.exception.NotFoundException;
 import com.api.webvote.v1.model.Associate;
@@ -15,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,37 +31,34 @@ public class AssociateServiceTests {
 	@Mock
 	private AssociateRepository associateRepository;
 
+	Associate associateDefault = AssociateStub.associateDefault();
+
 	@BeforeEach
-	public void initialize() {
+	public void setup() {
 		openMocks(this);
-
-		when(associateRepository.save(associateMock)).thenReturn(associateMock);
-		when(associateRepository.findAll()).thenReturn(associates);
-		when(associateRepository.findById(1L)).thenReturn(Optional.of(associateMock));
-
+		when(associateRepository.save(associateDefault)).thenReturn(associateDefault);
+		when(associateRepository.findAll()).thenReturn(new ArrayList<Associate>());
+		when(associateRepository.findById(1L)).thenReturn(Optional.of(associateDefault));
 	}
-	Associate associateMock = new Associate(1L, "Ralf Drehmer Wink", "000.000.000-00");
-	List<Associate> associates = new ArrayList<Associate>();
-
 
 	@Test
 	public void deveRetornarSucesso_aoCadastrarNovoAssociado() throws Exception {
-		when(associateRepository.findByCpf(associateMock.getCpf())).thenReturn(null);
+		when(associateRepository.findByCpf(associateDefault.getCpf())).thenReturn(null);
 
-		assertEquals(HttpStatus.OK, associateService.save(associateMock).getStatusCode());
+		assertEquals(HttpStatus.OK, associateService.save(associateDefault).getStatusCode());
 		verify(associateRepository, times(1)).save(any(Associate.class));
 	}
 
 	@Test
 	public void deveRetornarFalha_aoValidarCPFJaEstaCadastrado() throws Exception {
-		when(associateRepository.findByCpf(associateMock.getCpf())).thenReturn(associateMock);
-		assertThrows(BadRequestException.class, () -> CheckDuplicateCpf.validate(associateMock.getCpf(), associateRepository));
+		when(associateRepository.findByCpf(associateDefault.getCpf())).thenReturn(associateDefault);
+		assertThrows(BadRequestException.class, () -> CheckDuplicateCpf.validate(associateDefault.getCpf(), associateRepository));
 	}
 
 	@Test
 	public void deveRetornarSucesso_aoValidarCPFJaEstaCadastrado() throws Exception {
-		when(associateRepository.findByCpf(associateMock.getCpf())).thenReturn(null);
-		assertDoesNotThrow(() -> CheckDuplicateCpf.validate(associateMock.getCpf(), associateRepository));
+		when(associateRepository.findByCpf(associateDefault.getCpf())).thenReturn(null);
+		assertDoesNotThrow(() -> CheckDuplicateCpf.validate(associateDefault.getCpf(), associateRepository));
 	}
 
 	@Test
@@ -81,7 +78,7 @@ public class AssociateServiceTests {
 	
 	@Test
 	public void deveRetornarSucesso_aoBuscarUmAssociado() throws Exception {
-		assertEquals(ResponseEntity.ok(associateMock), associateService.get(1L));
+		assertEquals(ResponseEntity.ok(associateDefault), associateService.get(1L));
 		verify(associateRepository, times(1)).findById(any());
 	}
 	

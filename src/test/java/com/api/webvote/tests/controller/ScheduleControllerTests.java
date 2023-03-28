@@ -1,8 +1,10 @@
 package com.api.webvote.tests.controller;
 
 import com.api.webvote.tests.config.Convert;
+import com.api.webvote.tests.stubs.ScheduleStub;
 import com.api.webvote.v1.controller.ScheduleController;
 import com.api.webvote.v1.model.Schedule;
+import com.api.webvote.v1.repository.ScheduleRepository;
 import com.api.webvote.v1.service.schedule.ScheduleServiceInterface;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,30 +32,21 @@ public class ScheduleControllerTests {
 	private MockMvc mockMvc;
 	@MockBean
 	private ScheduleServiceInterface scheduleService;
-	private Schedule scheduleMock;
-
-	@BeforeEach
-	public void inicialize() {
-		scheduleMock = new Schedule();
-		scheduleMock.setTitle("Titulo da pauta");
-		
-		when(scheduleService.results(1L)).thenReturn(ResponseEntity.ok().build());
-		when(scheduleService.results(99999L)).thenReturn(ResponseEntity.notFound().build());
-	}
+	private Schedule scheduleDefault = ScheduleStub.scheduleDefault();
 
 	@Test
 	public void deveRetornarSucesso_aoCriarNovaPauta() throws Exception{
 		mockMvc.perform(post("/v1/api/schedule")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(Convert.asJsonString(scheduleMock)))
+				.content(Convert.asJsonString(scheduleDefault)))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	public void deveRetornarFalha_aoCriarNovaPauta() throws Exception{
 		mockMvc.perform(post("/v1/api/schedule")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(Convert.asJsonString(null)))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(Convert.asJsonString(null)))
 				.andExpect(status().isBadRequest());
 	}
 
@@ -65,6 +58,7 @@ public class ScheduleControllerTests {
 
 	@Test
 	public void deveRetornarFalha_aoBuscarResultadosDaPautaPeloIdInvalido() throws Exception {
+		when(scheduleService.results(99999L)).thenReturn(ResponseEntity.notFound().build());
 		mockMvc.perform(get("/v1/api/schedule/{id}", 99999L))
 				.andExpect(status().isNotFound());
 	}

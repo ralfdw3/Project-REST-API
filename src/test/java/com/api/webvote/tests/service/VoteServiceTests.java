@@ -1,5 +1,8 @@
 package com.api.webvote.tests.service;
 
+import com.api.webvote.tests.stubs.AssociateStub;
+import com.api.webvote.tests.stubs.ScheduleStub;
+import com.api.webvote.tests.stubs.VoteStub;
 import com.api.webvote.v1.enums.VotoEnum;
 import com.api.webvote.v1.exception.BadRequestException;
 import com.api.webvote.v1.model.Associate;
@@ -33,23 +36,19 @@ public class VoteServiceTests {
 	@Mock
 	private VoteRepository voteRepository;
 
+	private Associate associateDefault = AssociateStub.associateDefault();
+	private Schedule scheduleDefault = ScheduleStub.scheduleDefault();
+	private Vote voteDefault = VoteStub.voteDefault();
+
 	@BeforeEach
-	public void initialize() {
+	public void setup() {
 		openMocks(this);
-		when(voteRepository.save(voteMock)).thenReturn(voteMock);
+		when(voteRepository.save(voteDefault)).thenReturn(voteDefault);
 	}
-
-	List<Vote> votes = new ArrayList<Vote>();
-	Associate associateMock = new Associate(1L, "Ralf Drehmer Wink", "000.000.000-00");
-
-	Schedule scheduleMock = new Schedule(1L, "Schedule title", votes, 1, LocalDateTime.now(),
-			LocalDateTime.now().plusMinutes(1));
-
-	Vote voteMock = new Vote(1L, VotoEnum.SIM, associateMock, scheduleMock);
 
 	@Test
 	public void deveRetornarSucesso_aoCriarNovoVoto() throws Exception {
-		ResponseEntity<Vote> response = voteService.save(voteMock);
+		ResponseEntity<Vote> response = voteService.save(voteDefault);
 
 		verify(voteRepository, times(1)).save(any(Vote.class));
 		assertEquals(response, ResponseEntity.ok().build());
@@ -57,33 +56,33 @@ public class VoteServiceTests {
 
 	@Test
 	public void deveRetornarSucesso_aoVerificarARespostaDoAssociado() throws Exception {
-		assertDoesNotThrow(() -> CheckResponse.check(voteMock));
+		assertDoesNotThrow(() -> CheckResponse.check(voteDefault));
 	}
 	@Test
 	public void deveRetornarFalha_aoVerificarARespostaDoAssociado() throws Exception {
-		Vote voteMock = new Vote(1L, null, associateMock, scheduleMock);
+		Vote voteMock = new Vote(1L, null, associateDefault, scheduleDefault);
 		assertThrows(BadRequestException.class, () -> CheckResponse.check(voteMock));
 	}
 	@Test
 	public void deveRetornarSucesso_aoVerificarSeAssociadoJaVotouNaPauta() throws Exception {
-		assertDoesNotThrow(() -> CheckVotes.check(associateMock, scheduleMock));
+		assertDoesNotThrow(() -> CheckVotes.check(associateDefault, scheduleDefault));
 	}
 
 	@Test
 	public void deveRetornarFalha_aoVerificarSeAssociadoJaVotouNaPauta() throws Exception {
-		votes.add(voteMock);
-		assertThrows(BadRequestException.class, () -> CheckVotes.check(associateMock, scheduleMock));
+		scheduleDefault.getVotes().add(voteDefault);
+		assertThrows(BadRequestException.class, () -> CheckVotes.check(associateDefault, scheduleDefault));
 	}
 
 	@Test
 	public void deveRetornarFalha_aoVerificarSeAPautaExpirou() throws Exception {
-		scheduleMock.setEnd(LocalDateTime.now().plusMinutes(-5));
-		assertThrows(BadRequestException.class, () -> CheckExpiration.check(scheduleMock));
+		scheduleDefault.setEnd(LocalDateTime.now().plusMinutes(-5));
+		assertThrows(BadRequestException.class, () -> CheckExpiration.check(scheduleDefault));
 	}
 
 	@Test
 	public void deveRetornarSucesso_aoVerificarSeAPautaExpirou() throws Exception {
-		assertDoesNotThrow(() -> CheckExpiration.check(scheduleMock));
+		assertDoesNotThrow(() -> CheckExpiration.check(scheduleDefault));
 	}
 
 }

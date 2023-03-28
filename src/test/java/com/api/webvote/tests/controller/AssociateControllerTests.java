@@ -1,6 +1,7 @@
 package com.api.webvote.tests.controller;
 
 import com.api.webvote.tests.config.Convert;
+import com.api.webvote.tests.stubs.AssociateStub;
 import com.api.webvote.v1.controller.AssociateController;
 import com.api.webvote.v1.model.Associate;
 import com.api.webvote.v1.service.associate.AssociateServiceInterface;
@@ -33,12 +34,11 @@ public class AssociateControllerTests {
 	@MockBean
 	private AssociateServiceInterface clientService;
 	
-	private Associate associate;
+	private Associate associateDefault = AssociateStub.associateDefault();
 
 	@BeforeEach
-	public void inicialize() {
-		associate = new Associate(1L, "Ralf", "000.000.000-00");
-		when(clientService.get(1L)).thenReturn(ResponseEntity.ok(associate));
+	public void setup() {
+		when(clientService.get(1L)).thenReturn(ResponseEntity.ok(associateDefault));
 		when(clientService.get(99999L)).thenReturn(ResponseEntity.notFound().build());
 	}
 
@@ -46,9 +46,9 @@ public class AssociateControllerTests {
 	public void deveRetornarSucesso_aoBuscarAssociadoPelaId() throws Exception {
 		mockMvc.perform(get("/v1/api/associate/{id}", 1L))
 		.andExpect(status().isOk())
-		.andExpect(jsonPath("$.id").value(associate.getId()))
-		.andExpect(jsonPath("$.name").value("Ralf"))
-		.andExpect(jsonPath("$.cpf").value(associate.getCpf()));
+		.andExpect(jsonPath("$.id").value(associateDefault.getId()))
+		.andExpect(jsonPath("$.name").value("Ralf Drehmer Wink"))
+		.andExpect(jsonPath("$.cpf").value(associateDefault.getCpf()));
 	}
 
 	@Test
@@ -60,7 +60,7 @@ public class AssociateControllerTests {
 	public void deveRetornarSucesso_aoCriarNovoAssociado() throws Exception {
 		mockMvc.perform(post("/v1/api/associate")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(Convert.asJsonString(associate)))
+				.content(Convert.asJsonString(associateDefault)))
 				.andExpect(status().isOk());
 	}
 
