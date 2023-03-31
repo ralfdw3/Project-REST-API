@@ -1,4 +1,4 @@
-package com.api.webvote.v1.config;
+package com.api.webvote.v1.config.swagger;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

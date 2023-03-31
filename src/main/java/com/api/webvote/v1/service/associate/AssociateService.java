@@ -1,11 +1,14 @@
 package com.api.webvote.v1.service.associate;
 
+import com.api.webvote.v1.config.feign.CpfValidatorUsingFeign;
+import com.api.webvote.v1.config.feign.CpfValidatorUsingFeignImp;
 import com.api.webvote.v1.model.Associate;
 import com.api.webvote.v1.repository.AssociateRepository;
 import com.api.webvote.v1.service.check.CheckDuplicateCpf;
 import com.api.webvote.v1.service.check.CpfValidator;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +16,12 @@ import org.springframework.stereotype.Service;
 public class AssociateService implements AssociateServiceInterface {
 
 	private final AssociateRepository associateRepository;
+	private final CpfValidatorUsingFeignImp cpfValidatorUsingFeign;
 
 	@Autowired
-	public AssociateService(AssociateRepository associateRepository) {
+	public AssociateService(AssociateRepository associateRepository, CpfValidatorUsingFeignImp cpfValidatorUsingFeign) {
 		this.associateRepository = associateRepository;
+		this.cpfValidatorUsingFeign = cpfValidatorUsingFeign;
 	}
 
 	@Transactional
@@ -24,6 +29,9 @@ public class AssociateService implements AssociateServiceInterface {
 	public ResponseEntity<Associate> save(Associate associate) {
 		String cpf = associate.getCpf();
 
+		//cpfValidatorUsingFeign.validate(cpf);
+		//Problema de versão entre FeignClient com SpringBoot
+		//Decidi deixar desabilitado, visto que seria utilizado apenas com intuito de aprendizado :)
 		CpfValidator.validate(cpf);
 		CheckDuplicateCpf.validate(cpf, associateRepository);
 

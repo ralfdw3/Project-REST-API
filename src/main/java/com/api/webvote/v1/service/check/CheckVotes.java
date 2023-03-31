@@ -16,15 +16,9 @@ public class CheckVotes {
 
 	public static void check(Associate associate, Schedule schedule) {
 		logger.debug("-> Verificando se este associado já votou nesta pauta.");
-		
-		Long associateId = associate.getId();
-		List<Vote> votes = schedule.getVotes();
-		
-		for (Vote vote : votes) {
-			
-			if (associateId.equals(vote.getAssociate().getId())) {
-				throw new BadRequestException("O associado já votou nesta pauta.");
-			}
+
+		if(schedule.getVotes().stream().anyMatch(vote -> vote.getAssociate().getId().equals(associate.getId()))){
+			throw new BadRequestException("O associado já votou nesta pauta.");
 		}
 	}
 }
