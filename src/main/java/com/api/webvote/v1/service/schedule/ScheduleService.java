@@ -3,11 +3,14 @@ package com.api.webvote.v1.service.schedule;
 import com.api.webvote.v1.enums.VotoEnum;
 import com.api.webvote.v1.model.Schedule;
 import com.api.webvote.v1.repository.ScheduleRepository;
-import com.api.webvote.v1.service.check.CheckTitle;
+import com.api.webvote.v1.service.schedule.check.CheckTitle;
+import com.api.webvote.v1.service.schedule.check.ScheduleSystemChecker;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ScheduleService implements ScheduleServiceInterface {
@@ -19,19 +22,20 @@ public class ScheduleService implements ScheduleServiceInterface {
 		this.scheduleRepository = scheduleRepository;
 	}
 
+	@Autowired
+	private List<ScheduleSystemChecker> scheduleSystemChecker;
+
 	@Transactional
 	@Override
 	public ResponseEntity<Schedule> save (Schedule schedule) {
-		CheckTitle.check(schedule.getTitle());
-
+		scheduleSystemChecker.forEach(c -> c.check(schedule));
 		scheduleRepository.save(schedule);
-		return ResponseEntity.ok(schedule);
 
+		return ResponseEntity.ok(schedule);
 	}
 
 	@Override
 	public ResponseEntity<String> results(Long id) {
-		
 		ResponseEntity<Schedule> schedule = scheduleRepository.findById(id).map(record -> ResponseEntity.ok().body(record))
 				.orElse(ResponseEntity.notFound().build());
 		

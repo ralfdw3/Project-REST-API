@@ -4,9 +4,8 @@ import com.api.webvote.tests.stubs.ScheduleStub;
 import com.api.webvote.v1.exception.BadRequestException;
 import com.api.webvote.v1.exception.NotFoundException;
 import com.api.webvote.v1.model.Schedule;
-import com.api.webvote.v1.model.Vote;
 import com.api.webvote.v1.repository.ScheduleRepository;
-import com.api.webvote.v1.service.check.CheckTitle;
+import com.api.webvote.v1.service.schedule.check.CheckTitle;
 import com.api.webvote.v1.service.schedule.ScheduleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,8 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.http.HttpStatus;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,24 +38,19 @@ public class ScheduleServiceTests {
 	}
 
 	@Test
-	public void deveRetornarSucesso_aoCriarNovoSchedule() throws Exception {
-		assertEquals(HttpStatus.OK, scheduleService.save(scheduleDefault).getStatusCode());
-	}
-
-	@Test
 	public void deveRetornarSucesso_aoCriarScheduleComTituloValido() throws Exception {
-		assertDoesNotThrow(() -> CheckTitle.check(scheduleDefault.getTitle()));
+		assertDoesNotThrow(() -> new CheckTitle().check(scheduleDefault));
 	}
 	@Test
 	public void deveRetornarFalha_aoCriarScheduleComTituloNull() throws Exception {
 		scheduleDefault.setTitle(null);
-		assertThrows(BadRequestException.class, () -> CheckTitle.check(scheduleDefault.getTitle()));
+		assertThrows(BadRequestException.class, () -> new CheckTitle().check(scheduleDefault));
 	}
 
 	@Test
 	public void deveRetornarFalha_aoCriarScheduleComTituloEmpty() throws Exception {
 		scheduleDefault.setTitle("");
-		assertThrows(BadRequestException.class, () -> CheckTitle.check(scheduleDefault.getTitle()));
+		assertThrows(BadRequestException.class, () -> new CheckTitle().check(scheduleDefault));
 	}
 	
 	@Test

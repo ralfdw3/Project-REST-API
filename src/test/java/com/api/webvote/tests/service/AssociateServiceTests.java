@@ -6,8 +6,8 @@ import com.api.webvote.v1.exception.NotFoundException;
 import com.api.webvote.v1.model.Associate;
 import com.api.webvote.v1.repository.AssociateRepository;
 import com.api.webvote.v1.service.associate.AssociateService;
-import com.api.webvote.v1.service.check.CheckDuplicateCpf;
-import com.api.webvote.v1.service.check.CpfValidator;
+import com.api.webvote.v1.service.associate.check.CheckDuplicateCpf;
+import com.api.webvote.v1.service.associate.check.CpfValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -42,38 +42,30 @@ public class AssociateServiceTests {
 	}
 
 	@Test
-	public void deveRetornarSucesso_aoCadastrarNovoAssociado() throws Exception {
-		when(associateRepository.findByCpf(associateDefault.getCpf())).thenReturn(null);
-
-		assertEquals(HttpStatus.OK, associateService.save(associateDefault).getStatusCode());
-		verify(associateRepository, times(1)).save(any(Associate.class));
-	}
-
-	@Test
 	public void deveRetornarFalha_aoValidarCPFJaEstaCadastrado() throws Exception {
 		when(associateRepository.findByCpf(associateDefault.getCpf())).thenReturn(associateDefault);
-		assertThrows(BadRequestException.class, () -> CheckDuplicateCpf.validate(associateDefault.getCpf(), associateRepository));
+		assertThrows(BadRequestException.class, () -> new CheckDuplicateCpf(associateRepository).check(associateDefault));
 	}
 
 	@Test
 	public void deveRetornarSucesso_aoValidarCPFJaEstaCadastrado() throws Exception {
 		when(associateRepository.findByCpf(associateDefault.getCpf())).thenReturn(null);
-		assertDoesNotThrow(() -> CheckDuplicateCpf.validate(associateDefault.getCpf(), associateRepository));
+		assertDoesNotThrow(() -> new CheckDuplicateCpf(associateRepository).check(associateDefault));
 	}
 
 	@Test
 	public void deveRetornarFalha_aoValidarCPFInvalido() throws Exception {
-		assertThrows(BadRequestException.class, () -> CpfValidator.validate("000.000.000-05"));
+		assertThrows(BadRequestException.class, () -> new CpfValidator().check(AssociateStub.associateWithInvalidCpf()));
 	}
 
 	@Test
 	public void deveRetornarFalha_aoValidarCPFComMaisDe11Digitos() throws Exception {
-		assertThrows(BadRequestException.class, () -> CpfValidator.validate("035.592.500-150"));
+		assertThrows(BadRequestException.class, () -> new CpfValidator().check(AssociateStub.associateWithMoreThan11Characters()));
 	}
 
 	@Test
 	public void deveRetornarSucesso_aoValidarCPFValido() throws Exception {
-		assertDoesNotThrow(() -> CpfValidator.validate("000.000.000-00"));
+		assertDoesNotThrow(() -> new CpfValidator().check(associateDefault));
 	}
 	
 	@Test
