@@ -40,7 +40,7 @@ public class VoteControllerTests {
     private Vote voteDefault = VoteStub.voteDefault();
 
     @Test
-    public void deveRetornarSucesso_aoVotarEmUmaPauta() throws Exception {
+    public void Should_ReturnOk_When_Voting () throws Exception {
         mockMvc.perform(post("/v1/api/vote")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(Convert.asJsonString(voteDefault)))
@@ -48,11 +48,10 @@ public class VoteControllerTests {
     }
 
     @Test
-    public void deveRetornarFalha_aoVotarEmUmaPauta() throws Exception {
+    public void Should_ReturnBadRequest_When_Voting () throws Exception {
         mockMvc.perform(post("/v1/api/vote")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(Convert.asJsonString(null)))
                 .andExpect(status().isBadRequest());
     }
-
 }

@@ -9,7 +9,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -37,39 +39,35 @@ public class AssociateControllerTests {
 	private Associate associateDefault = AssociateStub.associateDefault();
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		when(clientService.get(1L)).thenReturn(ResponseEntity.ok(associateDefault));
 		when(clientService.get(99999L)).thenReturn(ResponseEntity.notFound().build());
 	}
-
 	@Test
-	public void deveRetornarSucesso_aoBuscarAssociadoPelaId() throws Exception {
+	void Should_ReturnOk_When_GetAssociateById () throws Exception {
 		mockMvc.perform(get("/v1/api/associate/{id}", 1L))
 		.andExpect(status().isOk())
 		.andExpect(jsonPath("$.id").value(associateDefault.getId()))
 		.andExpect(jsonPath("$.name").value("Ralf Drehmer Wink"))
 		.andExpect(jsonPath("$.cpf").value(associateDefault.getCpf()));
 	}
-
 	@Test
-	public void deveRetornarFalha_aoBuscarAssociadoComIdInvalido() throws Exception {
+	public void Should_ReturnNotFound_When_GetAssociateWithInvalidId () throws Exception {
 		mockMvc.perform(get("/v1/api/associate/{id}", 99999L))
 				.andExpect(status().isNotFound());
 	}
 	@Test
-	public void deveRetornarSucesso_aoCriarNovoAssociado() throws Exception {
+	public void Should_ReturnOk_When_CreateNewAssociate () throws Exception {
 		mockMvc.perform(post("/v1/api/associate")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(Convert.asJsonString(associateDefault)))
 				.andExpect(status().isOk());
 	}
-
 	@Test
-	public void deveRetornarFalha_aoCriarNovoAssociado() throws Exception {
+	public void Should_ReturnBadRequest_When_CreateNewAssociate () throws Exception {
 		mockMvc.perform(post("/v1/api/associate")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(Convert.asJsonString(null)))
 						.andExpect(status().isBadRequest());
 	}
-
 }

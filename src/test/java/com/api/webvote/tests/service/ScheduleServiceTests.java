@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 
 import java.util.Optional;
@@ -31,38 +32,36 @@ public class ScheduleServiceTests {
 	private Schedule scheduleDefault = ScheduleStub.scheduleDefault();
 
 	@BeforeEach
-	public void conditions() {
+	public void setup() {
 		openMocks(this);
 		when(scheduleRepository.save(scheduleDefault)).thenReturn(scheduleDefault);
 		when(scheduleRepository.findById(1L)).thenReturn(Optional.of(scheduleDefault));
 	}
 
 	@Test
-	public void deveRetornarSucesso_aoCriarScheduleComTituloValido() throws Exception {
+	public void Should_ReturnOk_When_CreateScheduleWithValidTitle () throws Exception {
 		assertDoesNotThrow(() -> new CheckTitle().check(scheduleDefault));
 	}
 	@Test
-	public void deveRetornarFalha_aoCriarScheduleComTituloNull() throws Exception {
+	public void Should_ThrowBadRequestException_When_CreateScheduleWithNullTitle () throws Exception {
 		scheduleDefault.setTitle(null);
 		assertThrows(BadRequestException.class, () -> new CheckTitle().check(scheduleDefault));
 	}
 
 	@Test
-	public void deveRetornarFalha_aoCriarScheduleComTituloEmpty() throws Exception {
+	public void Should_ThrowBadRequestException_When_CreateScheduleWithNullEmpty() throws Exception {
 		scheduleDefault.setTitle("");
 		assertThrows(BadRequestException.class, () -> new CheckTitle().check(scheduleDefault));
 	}
 	
 	@Test
-	public void deveRetornarSucesso_aoBuscarOResultadoDeUmaPauta() throws Exception {
+	public void Should_ReturnOk_When_GetScheduleResultsById () throws Exception {
 		assertEquals("Esta pauta teve um total de 0 votos 'Sim' e 0 votos 'Não'", scheduleService.results(1L).getBody());
 	}
 	
 	@Test
-	public void deveRetornarFalha_aoBuscarOResultadoDeUmaPautaComIdInvalido() throws Exception {
+	public void Should_ThrowNotFoundException_When_GetScheduleResultsWithInvalidId () throws Exception {
 		when(scheduleRepository.findById(any())).thenThrow(NotFoundException.class);
-
 		assertThrows(NotFoundException.class, () -> scheduleService.results(any()));
 	}
-
 }

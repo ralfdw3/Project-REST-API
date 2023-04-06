@@ -12,6 +12,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -42,40 +44,40 @@ public class AssociateServiceTests {
 	}
 
 	@Test
-	public void deveRetornarFalha_aoValidarCPFJaEstaCadastrado() throws Exception {
+	public void Should_ThrowBadRequestException_When_ValidateIfCpfIsRegisteredInTheDatabase () throws Exception {
 		when(associateRepository.findByCpf(associateDefault.getCpf())).thenReturn(associateDefault);
 		assertThrows(BadRequestException.class, () -> new CheckDuplicateCpf(associateRepository).check(associateDefault));
 	}
 
 	@Test
-	public void deveRetornarSucesso_aoValidarCPFJaEstaCadastrado() throws Exception {
+	public void Should_ReturnOk_When_ValidateIfCpfIsRegisteredInTheDatabase () throws Exception {
 		when(associateRepository.findByCpf(associateDefault.getCpf())).thenReturn(null);
 		assertDoesNotThrow(() -> new CheckDuplicateCpf(associateRepository).check(associateDefault));
 	}
 
 	@Test
-	public void deveRetornarFalha_aoValidarCPFInvalido() throws Exception {
+	public void Should_ThrowBadRequestException_When_ValidateInvalidCpf () throws Exception {
 		assertThrows(BadRequestException.class, () -> new CpfValidator().check(AssociateStub.associateWithInvalidCpf()));
 	}
 
 	@Test
-	public void deveRetornarFalha_aoValidarCPFComMaisDe11Digitos() throws Exception {
+	public void Should_ThrowBadRequestException_When_ValidateCpfNumberWithMoreThan11Characters () throws Exception {
 		assertThrows(BadRequestException.class, () -> new CpfValidator().check(AssociateStub.associateWithMoreThan11Characters()));
 	}
 
 	@Test
-	public void deveRetornarSucesso_aoValidarCPFValido() throws Exception {
+	public void Should_ReturnOk_When_ValidateValidCpf() throws Exception {
 		assertDoesNotThrow(() -> new CpfValidator().check(associateDefault));
 	}
 	
 	@Test
-	public void deveRetornarSucesso_aoBuscarUmAssociado() throws Exception {
+	public void Should_ReturnOk_When_GetAssociateById () throws Exception {
 		assertEquals(ResponseEntity.ok(associateDefault), associateService.get(1L));
 		verify(associateRepository, times(1)).findById(any());
 	}
 	
 	@Test
-	public void deveRetornarFalha_aoBuscarAssociadoPorIdInvalido() throws Exception {
+	public void Should_ThrowNotFoundException_When_GetAssociateWithInvalidId () throws Exception {
 		when(associateRepository.findById(any())).thenThrow(NotFoundException.class);
 
 		assertThrows(NotFoundException.class, () -> associateService.get(any()));

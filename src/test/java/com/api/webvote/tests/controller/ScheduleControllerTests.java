@@ -35,7 +35,7 @@ public class ScheduleControllerTests {
 	private Schedule scheduleDefault = ScheduleStub.scheduleDefault();
 
 	@Test
-	public void deveRetornarSucesso_aoCriarNovaPauta() throws Exception{
+	public void Should_ReturnOk_When_CreateNewSchedule () throws Exception{
 		mockMvc.perform(post("/v1/api/schedule")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(Convert.asJsonString(scheduleDefault)))
@@ -43,7 +43,7 @@ public class ScheduleControllerTests {
 	}
 
 	@Test
-	public void deveRetornarFalha_aoCriarNovaPauta() throws Exception{
+	public void Should_ReturnBadRequest_When_CreateNewSchedule () throws Exception{
 		mockMvc.perform(post("/v1/api/schedule")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(Convert.asJsonString(null)))
@@ -51,13 +51,13 @@ public class ScheduleControllerTests {
 	}
 
 	@Test
-	public void deveRetornarSucesso_aoBuscarResultadosDaPautaPeloId() throws Exception {
+	public void Should_ReturnOk_When_GetScheduleResultsById () throws Exception {
 		mockMvc.perform(get("/v1/api/schedule/{id}", 1L))
 		.andExpect(status().isOk());
 	}
 
 	@Test
-	public void deveRetornarFalha_aoBuscarResultadosDaPautaPeloIdInvalido() throws Exception {
+	public void Should_ReturnNotFound_When_GetScheduleResultsWithInvalidId () throws Exception {
 		when(scheduleService.results(99999L)).thenReturn(ResponseEntity.notFound().build());
 		mockMvc.perform(get("/v1/api/schedule/{id}", 99999L))
 				.andExpect(status().isNotFound());
