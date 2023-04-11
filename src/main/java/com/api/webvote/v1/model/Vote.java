@@ -4,6 +4,7 @@ import com.api.webvote.v1.enums.VotoEnum;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "vote")
 public class Vote {
 	
 	@Id

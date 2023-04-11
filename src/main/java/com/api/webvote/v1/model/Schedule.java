@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
+@Table(name = "schedule")
 public class Schedule {
 
 	@Id
@@ -19,7 +20,9 @@ public class Schedule {
 					@JoinColumn(name = "vote_id", referencedColumnName = "id") })
 	private List<Vote> votes;
 	private int duration;
+	@Column(name = "date_start")
 	private LocalDateTime start = LocalDateTime.now();
+	@Column(name = "date_end")
 	private LocalDateTime end = LocalDateTime.now().plusMinutes(1);
 
 	public Schedule() {

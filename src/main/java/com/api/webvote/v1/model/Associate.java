@@ -3,7 +3,7 @@ package com.api.webvote.v1.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "client", schema = "webvote")
+@Table(name = "associate")
 public class Associate {
 
 	@Id
